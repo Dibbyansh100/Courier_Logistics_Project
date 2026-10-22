@@ -5,50 +5,56 @@ import ProtectedRoute from './ProtectedRoute';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
-// Public & Portal Pages
+// Public Pages
 import Homepage from './Homepage';
 import Login from './Login';
 import Register from './Register';
-import CustomerLogin from './CustomerLogin';
-import CustomerRegister from './CustomerRegister';
-import AgentLogin from './AgentLogin';
-import AgentRegister from './AgentRegister';
-import AdminLogin from './AdminLogin';
-import AdminRegister from './AdminRegister';
 
-// Admin Pages
-import AdminDashboard from './AdminDashboard';
-import AdminCustomers from './AdminCustomers';
-import AdminCustomerForm from './AdminCustomerForm';
-import AdminAgents from './AdminAgents';
-import AdminAgentForm from './AdminAgentForm';
-import AdminWarehouses from './AdminWarehouses';
-import AdminWarehouseForm from './AdminWarehouseForm';
-import AdminShipments from './AdminShipments';
-import AdminBookShipment from './AdminBookShipment';
-import AdminShipmentDetails from './AdminShipmentDetails';
-import AdminPackages from './AdminPackages';
-import AdminPayments from './AdminPayments';
-import AdminProfile from './AdminProfile';
-import AdminTracking from './AdminTracking';
+// Admin Portal Pages & Components
+import {
+  AdminLogin,
+  AdminRegister,
+  AdminDashboard,
+  AdminCustomers,
+  AdminCustomerForm,
+  AdminAgents,
+  AdminAgentForm,
+  AdminWarehouses,
+  AdminWarehouseForm,
+  AdminShipments,
+  AdminBookShipment,
+  AdminShipmentDetails,
+  AdminPackages,
+  AdminPayments,
+  AdminProfile,
+  AdminTracking,
+} from './admin';
 
-// Customer Pages
-import CustomerDashboard from './CustomerDashboard';
-import CustomerBook from './CustomerBook';
-import CustomerShipments from './CustomerShipments';
-import CustomerShipmentDetails from './CustomerShipmentDetails';
-import CustomerPayments from './CustomerPayments';
-import CustomerProfile from './CustomerProfile';
-import CustomerHelp from './CustomerHelp';
-import CustomerTrack from './CustomerTrack';
+// Customer Portal Pages & Components
+import {
+  CustomerLogin,
+  CustomerRegister,
+  CustomerDashboard,
+  CustomerBook,
+  CustomerShipments,
+  CustomerShipmentDetails,
+  CustomerPayments,
+  CustomerProfile,
+  CustomerHelp,
+  CustomerTrack,
+} from './customer';
 
-// Agent Pages
-import AgentDashboard from './AgentDashboard';
-import AgentShipments from './AgentShipments';
-import AgentShipmentDetails from './AgentShipmentDetails';
-import AgentHistory from './AgentHistory';
-import AgentProfile from './AgentProfile';
-import AgentStatus from './AgentStatus';
+// Delivery Agent Portal Pages & Components
+import {
+  AgentLogin,
+  AgentRegister,
+  AgentDashboard,
+  AgentShipments,
+  AgentShipmentDetails,
+  AgentHistory,
+  AgentProfile,
+  AgentStatus,
+} from './agent';
 
 // Layout Component for Protected Dashboard Views
 const DashboardLayout = ({ children }) => {
