@@ -135,7 +135,7 @@ export const trackingApi = {
 
 // User (Admin) API
 export const userApi = {
-  create: (data) => api.post('/users', data),
+  create: (data) => api.post('/users/register', data),
   list: () => api.get('/users'),
   getById: (id) => api.get(`/users/${id}`),
 };

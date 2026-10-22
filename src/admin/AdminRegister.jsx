@@ -64,7 +64,6 @@ export const AdminRegister = () => {
     try {
       const payload = {
         username: formData.username.trim(),
-        email: formData.email.trim(),
         password: formData.password,
         role: 'ROLE_ADMIN',
       };
