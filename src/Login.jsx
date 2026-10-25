@@ -1,81 +1,26 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from './Axios';
-import { useAuth } from './AuthContext';
-import ErrorMessage from './ErrorMessage';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useLoginForm } from './hooks/useLoginForm';
+import { ErrorMessage } from './components/common';
 
 export const Login = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const validate = () => {
-    const errs = {};
-    if (!username.trim()) {
-      errs.username = 'Email or phone number is required';
-    }
-    if (!password) {
-      errs.password = 'Password is required';
-    }
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setServerError('');
-
-    if (!validate()) return;
-
-    setLoading(true);
-    try {
-      const response = await authApi.login({
-        username: username.trim(),
-        password: password,
-      });
-
-      const resData = response.data;
-      if (resData && resData.data) {
-        const userData = resData.data;
-        // Keep the exact typed identifier (email or phone) for Basic Auth
-        userData.loginIdentifier = username.trim();
-
-        // Save in AuthContext and sessionStorage
-        login(userData, password);
-
-        // Normalized Role routing
-        const role = (userData.role || '').toUpperCase();
-        if (role.includes('ADMIN')) {
-          navigate('/admin/dashboard', { replace: true });
-        } else if (role.includes('DELIVERY') || role.includes('AGENT')) {
-          navigate('/agent/dashboard', { replace: true });
-        } else {
-          navigate('/customer/dashboard', { replace: true });
-        }
-      } else {
-        setServerError(resData.message || 'Login failed. Please try again.');
-      }
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        (err.response?.status === 401
-          ? 'Invalid username or password'
-          : 'Unable to connect to the server. Please check backend is running.');
-      setServerError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    username,
+    password,
+    errors,
+    serverError,
+    loading,
+    handleUsernameChange,
+    handlePasswordChange,
+    handleSubmit,
+  } = useLoginForm({
+    usernameRequiredMsg: 'Email or phone number is required',
+  });
 
   return (
     <div className="auth-page">
       <div className="auth-card">
-        {/* One-Click Home Page Navigator */}
+        {/* Navigation Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <Link
             to="/"
@@ -96,33 +41,35 @@ export const Login = () => {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label className="form-label">Email or Phone</label>
+            <label className="form-label" htmlFor="login-identifier">
+              Email or Phone
+            </label>
             <input
+              id="login-identifier"
               type="text"
               name="username"
               className="form-control"
-              placeholder="e.g. user@gmail.com or 9876543210"
+              placeholder="e.g. john@example.com or 9876543210"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                if (errors.username) setErrors((prev) => ({ ...prev, username: '' }));
-              }}
+              onChange={handleUsernameChange}
+              autoComplete="username"
             />
             {errors.username && <span className="form-error">{errors.username}</span>}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label" htmlFor="login-password">
+              Password
+            </label>
             <input
+              id="login-password"
               type="password"
               name="password"
               className="form-control"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
-              }}
+              onChange={handlePasswordChange}
+              autoComplete="current-password"
             />
             {errors.password && <span className="form-error">{errors.password}</span>}
           </div>
@@ -146,13 +93,27 @@ export const Login = () => {
           </Link>
         </div>
 
-        <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
-          <Link
-            to="/"
-            style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <span>🏠</span>
-            <span>Return to Home Page</span>
+        {/* Portal Shortcuts */}
+        <div
+          style={{
+            marginTop: '1.5rem',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid var(--border-color)',
+            display: 'flex',
+            justifyContent: 'space-around',
+            fontSize: '0.8rem',
+          }}
+        >
+          <Link to="/agent/login" style={{ color: 'var(--text-muted)' }}>
+            Agent Portal
+          </Link>
+          <span style={{ color: 'var(--border-color)' }}>•</span>
+          <Link to="/admin/login" style={{ color: 'var(--text-muted)' }}>
+            Admin Portal
+          </Link>
+          <span style={{ color: 'var(--border-color)' }}>•</span>
+          <Link to="/customer/login" style={{ color: 'var(--text-muted)' }}>
+            Customer Portal
           </Link>
         </div>
       </div>

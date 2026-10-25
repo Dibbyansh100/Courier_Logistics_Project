@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import Sidebar from './Sidebar';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import { useAuth } from './context/AuthContext';
+import { Sidebar, Navbar, Footer } from './components/layout';
 import heroBg from './assets/hero-bg.jpg';
+import { ROLES } from './constants';
 
 export const Homepage = () => {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export const Homepage = () => {
   const handleTrackSubmit = (e) => {
     e.preventDefault();
     if (!quickTrack.trim()) return;
-    if (isAuthenticated && user?.role === 'ROLE_ADMIN') {
+    if (isAuthenticated && user?.role === ROLES.ADMIN) {
       navigate(`/admin/tracking?trk=${encodeURIComponent(quickTrack.trim())}`);
     } else {
       navigate(`/customer/track?trk=${encodeURIComponent(quickTrack.trim())}`);
@@ -114,7 +113,11 @@ export const Homepage = () => {
                 onChange={(e) => setQuickTrack(e.target.value)}
                 aria-label="Consignment Tracking Number"
               />
-              <button type="submit" className="btn btn-primary" style={{ padding: '0 1.75rem', whiteSpace: 'nowrap' }}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ padding: '0 1.75rem', whiteSpace: 'nowrap' }}
+              >
                 Track
               </button>
             </form>
@@ -124,7 +127,16 @@ export const Homepage = () => {
           <div className="hero-features">
             <div className="feature-box">
               <div className="feature-svg-icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="1" y="3" width="15" height="13" />
                   <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
                   <circle cx="5.5" cy="18.5" r="2.5" />
@@ -139,7 +151,16 @@ export const Homepage = () => {
 
             <div className="feature-box">
               <div className="feature-svg-icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M3 21h18" />
                   <path d="M5 21V7l8-4v18" />
                   <path d="M19 21V11l-6-4" />
@@ -157,7 +178,16 @@ export const Homepage = () => {
 
             <div className="feature-box">
               <div className="feature-svg-icon" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                   <line x1="1" y1="10" x2="23" y2="10" />
                 </svg>

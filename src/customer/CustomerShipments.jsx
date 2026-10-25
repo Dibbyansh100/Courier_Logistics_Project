@@ -119,7 +119,7 @@ export const CustomerShipments = () => {
                           Details
                         </Link>
                         <Link to={`/customer/track/${s.id}`} className="btn btn-primary btn-sm">
-                          📍 Track
+                           Track
                         </Link>
                       </div>
                     </td>

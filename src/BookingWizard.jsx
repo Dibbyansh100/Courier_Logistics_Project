@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { customerApi, warehouseApi, shipmentApi } from './Axios';
-import ErrorMessage from './ErrorMessage';
-import Loader from './Loader';
+import { useAuth } from './context/AuthContext';
+import { customerService, warehouseService, shipmentService } from './services';
+import { ErrorMessage, Loader } from './components/common';
+import { PRICING, PACKAGE_TYPES } from './constants';
 
 export const BookingWizard = ({ isAdmin = false }) => {
   const { user } = useAuth();
@@ -15,7 +15,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successInfo, setSuccessInfo] = useState(null);
 
-  // Dropdown lists
+  // Dropdown data
   const [customers, setCustomers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
 
@@ -24,14 +24,14 @@ export const BookingWizard = ({ isAdmin = false }) => {
     customerId: !isAdmin && user ? user.id : '',
     sourceCity: '',
     sourceAddress: '',
-    
-    // Package
+
+    // Package details
     packageDescription: '',
     weight: '',
     fragile: false,
-    packageType: 'BOX',
+    packageType: PACKAGE_TYPES.BOX,
 
-    // Delivery / Receiver
+    // Delivery destination & receiver
     receiverName: '',
     receiverPhone: '',
     deliveryAddress: '',
@@ -45,17 +45,13 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
   const [errors, setErrors] = useState({});
 
-  // Constants
-  const RATE_PER_KG = 50.0;
-  const FRAGILE_SURCHARGE = 100.0;
-
   useEffect(() => {
     const loadPrerequisites = async () => {
       setFetchingData(true);
       try {
-        const promises = [warehouseApi.list()];
+        const promises = [warehouseService.list()];
         if (isAdmin) {
-          promises.push(customerApi.list());
+          promises.push(customerService.list());
         }
         const [wRes, cRes] = await Promise.allSettled(promises);
 
@@ -68,9 +64,15 @@ export const BookingWizard = ({ isAdmin = false }) => {
             : [];
         }
 
-        // If backend security blocks customer role from /api/warehouses (403), use database hub records
+        // Fallback matching the 14 seeded warehouses on Render
         if (warehouseList.length === 0) {
           warehouseList = [
+            { id: 1, name: 'Bengaluru Central Hub', location: 'Bengaluru', capacity: 8000 },
+            { id: 2, name: 'Mumbai Distribution Center', location: 'Mumbai', capacity: 12000 },
+            { id: 3, name: 'Delhi NCR Logistics Park', location: 'Delhi', capacity: 15000 },
+            { id: 4, name: 'Chennai Transit Terminal', location: 'Chennai', capacity: 7500 },
+            { id: 5, name: 'Hyderabad Sorting Facility', location: 'Hyderabad', capacity: 9000 },
+            { id: 6, name: 'Pune Regional Cargo Depot', location: 'Pune', capacity: 6000 },
             { id: 7, name: 'Bangalore Central Warehouse', location: 'Electronic City, Bangalore, Karnataka', capacity: 15000 },
             { id: 8, name: 'Delhi Distribution Center', location: 'Okhla Industrial Area, New Delhi', capacity: 20000 },
             { id: 9, name: 'Mumbai Storage Hub', location: 'Andheri East, Mumbai, Maharashtra', capacity: 12000 },
@@ -79,12 +81,6 @@ export const BookingWizard = ({ isAdmin = false }) => {
             { id: 12, name: 'Chennai Goods Warehouse', location: 'Ambattur Industrial Estate, Chennai, Tamil Nadu', capacity: 10000 },
             { id: 13, name: 'Jaipur Storage Facility', location: 'Sitapura Industrial Area, Jaipur, Rajasthan', capacity: 7500 },
             { id: 14, name: 'Kolkata Freight Warehouse', location: 'Dankuni, Kolkata, West Bengal', capacity: 14000 },
-            { id: 1, name: 'Bengaluru Central Hub', location: 'Bengaluru', capacity: 8000 },
-            { id: 2, name: 'Mumbai Distribution Center', location: 'Mumbai', capacity: 12000 },
-            { id: 3, name: 'Delhi NCR Logistics Park', location: 'Delhi', capacity: 15000 },
-            { id: 4, name: 'Chennai Transit Terminal', location: 'Chennai', capacity: 7500 },
-            { id: 5, name: 'Hyderabad Sorting Facility', location: 'Hyderabad', capacity: 9000 },
-            { id: 6, name: 'Pune Regional Cargo Depot', location: 'Pune', capacity: 6000 },
           ];
         }
 
@@ -102,7 +98,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
           }
         }
       } catch (err) {
-        console.warn('Warehouse/customer loading handled', err);
+        console.warn('Prerequisites loading caught error', err);
       } finally {
         setFetchingData(false);
       }
@@ -116,7 +112,8 @@ export const BookingWizard = ({ isAdmin = false }) => {
     const val = type === 'checkbox' ? checked : value;
 
     if (name === 'packageType') {
-      const isFragileSelection = value === 'FRAGILE_BOX' || value === 'FRAGILE_ELECTRONICS' || value === 'FRAGILE';
+      const isFragileSelection =
+        value === 'FRAGILE_BOX' || value === 'FRAGILE_ELECTRONICS' || value === 'FRAGILE';
       setFormData((prev) => ({
         ...prev,
         packageType: value,
@@ -133,57 +130,57 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
   // Calculations
   const calculatedWeight = parseFloat(formData.weight) || 0;
-  const baseCost = calculatedWeight * RATE_PER_KG;
-  const fragileCost = formData.fragile ? FRAGILE_SURCHARGE : 0;
+  const baseCost = calculatedWeight * PRICING.RATE_PER_KG;
+  const fragileCost = formData.fragile ? PRICING.FRAGILE_SURCHARGE : 0;
   const totalEstimatedAmount = baseCost + fragileCost;
 
-  // Validation per step
+  // Multi-step Validation
   const validateStep = (step) => {
-    const errs = {};
+    const nextErrors = {};
     if (step === 1) {
       if (isAdmin && !formData.customerId) {
-        errs.customerId = 'Please select a customer';
+        nextErrors.customerId = 'Please select a customer';
       }
       if (!formData.sourceCity.trim()) {
-        errs.sourceCity = 'Source city is required';
+        nextErrors.sourceCity = 'Source city is required';
       }
       if (!formData.sourceAddress.trim()) {
-        errs.sourceAddress = 'Pickup address is required';
+        nextErrors.sourceAddress = 'Pickup address is required';
       }
     } else if (step === 2) {
       if (!formData.packageDescription.trim()) {
-        errs.packageDescription = 'Package description is required';
+        nextErrors.packageDescription = 'Package description is required';
       }
       if (!formData.weight || parseFloat(formData.weight) <= 0) {
-        errs.weight = 'Weight must be greater than 0 kg';
+        nextErrors.weight = 'Weight must be greater than 0 kg';
       }
       if (!formData.packageType) {
-        errs.packageType = 'Package type is required';
+        nextErrors.packageType = 'Package type is required';
       }
     } else if (step === 3) {
       if (!formData.receiverName.trim()) {
-        errs.receiverName = 'Receiver name is required';
+        nextErrors.receiverName = 'Receiver name is required';
       }
       if (!formData.receiverPhone.trim()) {
-        errs.receiverPhone = 'Receiver phone is required';
+        nextErrors.receiverPhone = 'Receiver phone is required';
       } else if (!/^\d{10}$/.test(formData.receiverPhone.trim())) {
-        errs.receiverPhone = 'Phone must be exactly 10 digits';
+        nextErrors.receiverPhone = 'Phone must be exactly 10 digits';
       }
       if (!formData.deliveryAddress.trim()) {
-        errs.deliveryAddress = 'Delivery address is required';
+        nextErrors.deliveryAddress = 'Delivery address is required';
       }
       if (!formData.deliveryCity.trim()) {
-        errs.deliveryCity = 'City is required';
+        nextErrors.deliveryCity = 'City is required';
       }
       if (!formData.deliveryPincode.trim()) {
-        errs.deliveryPincode = 'Pincode is required';
+        nextErrors.deliveryPincode = 'Pincode is required';
       } else if (!/^\d{6}$/.test(formData.deliveryPincode.trim())) {
-        errs.deliveryPincode = 'Pincode must be exactly 6 digits';
+        nextErrors.deliveryPincode = 'Pincode must be exactly 6 digits';
       }
     }
 
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleNext = () => {
@@ -205,26 +202,25 @@ export const BookingWizard = ({ isAdmin = false }) => {
     try {
       const destinationFull = `${formData.deliveryAddress.trim()}, ${formData.deliveryCity.trim()} - ${formData.deliveryPincode.trim()}`;
       const sourceFull = `${formData.sourceAddress.trim()}, ${formData.sourceCity.trim()}`;
-
       const selectedCustomerId = isAdmin ? Number(formData.customerId) : Number(user.id);
 
-      // Map UI Package Type to backend supported enum [BOX, PARCEL, ENVELOPE] and ensure fragile is set
-      let backendPackageType = 'BOX';
+      // Map UI package selection to backend supported enum [BOX, PARCEL, ENVELOPE]
+      let backendPackageType = PACKAGE_TYPES.BOX;
       let isFragile = Boolean(formData.fragile);
 
-      if (formData.packageType === 'ENVELOPE') {
-        backendPackageType = 'ENVELOPE';
-      } else if (formData.packageType === 'PARCEL') {
-        backendPackageType = 'PARCEL';
+      if (formData.packageType === PACKAGE_TYPES.ENVELOPE) {
+        backendPackageType = PACKAGE_TYPES.ENVELOPE;
+      } else if (formData.packageType === PACKAGE_TYPES.PARCEL) {
+        backendPackageType = PACKAGE_TYPES.PARCEL;
       } else if (
         formData.packageType === 'FRAGILE_ELECTRONICS' ||
         formData.packageType === 'FRAGILE_BOX' ||
         formData.packageType === 'FRAGILE'
       ) {
-        backendPackageType = 'BOX';
+        backendPackageType = PACKAGE_TYPES.BOX;
         isFragile = true;
       } else {
-        backendPackageType = 'BOX';
+        backendPackageType = PACKAGE_TYPES.BOX;
       }
 
       const payload = {
@@ -246,15 +242,14 @@ export const BookingWizard = ({ isAdmin = false }) => {
         },
       };
 
-      const res = await shipmentApi.create(payload);
+      const res = await shipmentService.create(payload);
       const createdShipment = res.data?.data || res.data;
       setSuccessInfo(createdShipment);
     } catch (err) {
-      // 409 Conflict: broken business rule (keep entered data and stay on form)
       const errorText =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        'Booking failed due to an error. Please verify customer, warehouse and agent availability.';
+        'Booking failed. Please verify customer, warehouse, and network connection.';
       setErrorMessage(errorText);
     } finally {
       setLoading(false);
@@ -299,6 +294,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <button
+            type="button"
             onClick={() => {
               setSuccessInfo(null);
               setCurrentStep(1);
@@ -308,6 +304,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
             Book Another Shipment
           </button>
           <button
+            type="button"
             onClick={() => {
               if (isAdmin) {
                 navigate(`/admin/shipments/${successInfo.id || ''}`);
@@ -343,15 +340,12 @@ export const BookingWizard = ({ isAdmin = false }) => {
               currentStep > s.num ? 'completed' : ''
             }`}
           >
-            <div className="step-circle">
-              {currentStep > s.num ? '✓' : s.num}
-            </div>
+            <div className="step-circle">{currentStep > s.num ? '✓' : s.num}</div>
             <span className="step-label">{s.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Backend 409 or other error message displayed here */}
       {errorMessage && (
         <div style={{ marginBottom: '1.5rem' }}>
           <ErrorMessage message={errorMessage} />
@@ -367,8 +361,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
           {isAdmin ? (
             <div className="form-group">
-              <label className="form-label">Select Customer *</label>
+              <label className="form-label" htmlFor="booking-customer-select">
+                Select Customer *
+              </label>
               <select
+                id="booking-customer-select"
                 name="customerId"
                 className="form-control"
                 value={formData.customerId}
@@ -385,8 +382,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
             </div>
           ) : (
             <div className="form-group">
-              <label className="form-label">Booking Customer</label>
+              <label className="form-label" htmlFor="booking-customer-name">
+                Booking Customer
+              </label>
               <input
+                id="booking-customer-name"
                 type="text"
                 className="form-control"
                 value={`${user?.name || ''} (${user?.username || ''})`}
@@ -400,8 +400,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Source City *</label>
+              <label className="form-label" htmlFor="booking-source-city">
+                Source City *
+              </label>
               <input
+                id="booking-source-city"
                 type="text"
                 name="sourceCity"
                 className="form-control"
@@ -413,8 +416,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Pickup Address *</label>
+              <label className="form-label" htmlFor="booking-source-address">
+                Pickup Address *
+              </label>
               <input
+                id="booking-source-address"
                 type="text"
                 name="sourceAddress"
                 className="form-control"
@@ -436,8 +442,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
           </h3>
 
           <div className="form-group">
-            <label className="form-label">Package Description *</label>
+            <label className="form-label" htmlFor="booking-pkg-desc">
+              Package Description *
+            </label>
             <input
+              id="booking-pkg-desc"
               type="text"
               name="packageDescription"
               className="form-control"
@@ -452,8 +461,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Weight (in kg) *</label>
+              <label className="form-label" htmlFor="booking-pkg-weight">
+                Weight (in kg) *
+              </label>
               <input
+                id="booking-pkg-weight"
                 type="number"
                 step="0.1"
                 min="0.1"
@@ -467,8 +479,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Package Type *</label>
+              <label className="form-label" htmlFor="booking-pkg-type">
+                Package Type *
+              </label>
               <select
+                id="booking-pkg-type"
                 name="packageType"
                 className="form-control"
                 value={formData.packageType}
@@ -493,7 +508,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
                 onChange={handleChange}
               />
               <span>
-                Fragile package (requires careful handling, adds ₹{FRAGILE_SURCHARGE} flat surcharge)
+                Fragile package (requires careful handling, adds ₹{PRICING.FRAGILE_SURCHARGE} flat surcharge)
               </span>
             </label>
           </div>
@@ -509,8 +524,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Receiver Name *</label>
+              <label className="form-label" htmlFor="booking-receiver-name">
+                Receiver Name *
+              </label>
               <input
+                id="booking-receiver-name"
                 type="text"
                 name="receiverName"
                 className="form-control"
@@ -524,8 +542,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Receiver Phone * (10 digits)</label>
+              <label className="form-label" htmlFor="booking-receiver-phone">
+                Receiver Phone * (10 digits)
+              </label>
               <input
+                id="booking-receiver-phone"
                 type="tel"
                 maxLength="10"
                 name="receiverPhone"
@@ -541,8 +562,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Delivery Street Address *</label>
+            <label className="form-label" htmlFor="booking-delivery-addr">
+              Delivery Street Address *
+            </label>
             <input
+              id="booking-delivery-addr"
               type="text"
               name="deliveryAddress"
               className="form-control"
@@ -557,8 +581,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">City *</label>
+              <label className="form-label" htmlFor="booking-delivery-city">
+                City *
+              </label>
               <input
+                id="booking-delivery-city"
                 type="text"
                 name="deliveryCity"
                 className="form-control"
@@ -572,8 +599,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Pincode * (6 digits)</label>
+              <label className="form-label" htmlFor="booking-delivery-pincode">
+                Pincode * (6 digits)
+              </label>
               <input
+                id="booking-delivery-pincode"
                 type="text"
                 maxLength="6"
                 name="deliveryPincode"
@@ -589,8 +619,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Routing Warehouse Hub &amp; Location (Optional)</label>
+            <label className="form-label" htmlFor="booking-warehouse-select">
+              Routing Warehouse Hub &amp; Location (Optional)
+            </label>
             <select
+              id="booking-warehouse-select"
               name="warehouseId"
               className="form-control"
               value={formData.warehouseId}
@@ -603,11 +636,6 @@ export const BookingWizard = ({ isAdmin = false }) => {
                 </option>
               ))}
             </select>
-            {warehouses.length === 0 && (
-              <span style={{ fontSize: '0.8rem', color: 'var(--accent-amber)', marginTop: '0.25rem' }}>
-                ⚠️ No warehouse hubs are currently registered in the database.
-              </span>
-            )}
           </div>
         </div>
       )}
@@ -648,7 +676,9 @@ export const BookingWizard = ({ isAdmin = false }) => {
                 <strong>Receiver:</strong> {formData.receiverName} ({formData.receiverPhone})
               </p>
               <p style={{ fontSize: '0.85rem' }}>
-                <strong>Hub:</strong> {warehouses.find((w) => String(w.id) === String(formData.warehouseId))?.name || 'Direct Delivery / Auto-Assign'}
+                <strong>Hub:</strong>{' '}
+                {warehouses.find((w) => String(w.id) === String(formData.warehouseId))?.name ||
+                  'Direct Delivery / Auto-Assign'}
               </p>
             </div>
 
@@ -699,7 +729,7 @@ export const BookingWizard = ({ isAdmin = false }) => {
               💰 Cost Breakdown
             </h4>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '0.4rem' }}>
-              <span>Base Freight ({calculatedWeight} kg × ₹{RATE_PER_KG}/kg):</span>
+              <span>Base Freight ({calculatedWeight} kg × ₹{PRICING.RATE_PER_KG}/kg):</span>
               <span>₹{baseCost.toFixed(2)}</span>
             </div>
             {formData.fragile && (
@@ -740,8 +770,11 @@ export const BookingWizard = ({ isAdmin = false }) => {
           </p>
 
           <div className="form-group" style={{ maxWidth: '300px', margin: '0 auto 1.5rem', textAlign: 'left' }}>
-            <label className="form-label">Payment Preference</label>
+            <label className="form-label" htmlFor="booking-payment-method">
+              Payment Preference
+            </label>
             <select
+              id="booking-payment-method"
               name="paymentMethod"
               className="form-control"
               value={formData.paymentMethod}

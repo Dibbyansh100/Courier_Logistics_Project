@@ -39,7 +39,7 @@ export const CustomerShipmentDetails = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <Link to={`/customer/track/${shipment.id}`} className="btn btn-primary">
-            📍 Track Live Status
+            Track Live Status
           </Link>
           <Link to="/customer/shipments" className="btn btn-secondary">
             ← Back to Shipments

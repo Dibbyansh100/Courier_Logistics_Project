@@ -81,7 +81,7 @@ export const CustomerHelp = () => {
               }}
             >
               <h4 style={{ color: 'var(--accent-cyan)', fontSize: '0.95rem', marginBottom: '0.35rem' }}>
-                ❓ {faq.q}
+                 {faq.q}
               </h4>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.6' }}>
                 {faq.a}
