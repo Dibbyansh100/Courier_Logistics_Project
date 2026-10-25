@@ -72,7 +72,7 @@ export const AdminShipments = () => {
           <p className="page-subtitle">Track, monitor, assign and dispatch cargo across all hubs</p>
         </div>
         <Link to="/admin/shipments/new" className="btn btn-primary">
-          ➕ Book New Shipment
+           Book New Shipment
         </Link>
       </div>
 
@@ -111,7 +111,7 @@ export const AdminShipments = () => {
 
         {filteredShipments.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🚚</div>
+            <div className="empty-icon"></div>
             <p>No shipments found matching the filters.</p>
           </div>
         ) : (

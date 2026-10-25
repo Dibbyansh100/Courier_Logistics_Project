@@ -95,7 +95,7 @@ export const AdminPackages = () => {
                     <td>{p.weight} kg</td>
                     <td>
                       {p.fragile ? (
-                        <span className="badge badge-cancelled">⚠️ Fragile</span>
+                        <span className="badge badge-cancelled"> Fragile</span>
                       ) : (
                         <span className="badge badge-delivered">Non-Fragile</span>
                       )}

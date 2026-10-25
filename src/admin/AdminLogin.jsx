@@ -32,7 +32,7 @@ export const AdminLogin = () => {
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.4rem 0.85rem' }}
             title="Navigate to Home Page"
           >
-            <span style={{ fontSize: '1rem' }}>🏠</span>
+            <span style={{ fontSize: '1rem' }}></span>
             <span>Back to Home</span>
           </Link>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>LogiTrack Hub</span>

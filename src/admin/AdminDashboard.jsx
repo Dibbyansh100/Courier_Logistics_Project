@@ -82,7 +82,7 @@ export const AdminDashboard = () => {
             🔄 Refresh
           </button>
           <Link to="/admin/shipments/new" className="btn btn-primary btn-sm">
-            ➕ New Shipment
+             New Shipment
           </Link>
         </div>
       </div>

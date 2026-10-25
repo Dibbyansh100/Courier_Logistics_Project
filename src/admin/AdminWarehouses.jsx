@@ -62,7 +62,7 @@ export const AdminWarehouses = () => {
           <p className="page-subtitle">Manage distribution centers, transit hubs, and sorting facilities</p>
         </div>
         <Link to="/admin/warehouses/new" className="btn btn-primary">
-          ➕ Add Warehouse
+           Add Warehouse
         </Link>
       </div>
 
@@ -84,7 +84,7 @@ export const AdminWarehouses = () => {
 
         {filteredWarehouses.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🏭</div>
+            <div className="empty-icon"></div>
             <p>No warehouses found.</p>
           </div>
         ) : (

@@ -102,7 +102,7 @@ export const AdminShipmentDetails = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <Link to={`/admin/tracking/${shipment.id}`} className="btn btn-primary btn-sm">
-            📍 Full Tracking Timeline
+             Full Tracking Timeline
           </Link>
           <Link to="/admin/shipments" className="btn btn-secondary btn-sm">
             ← Back to Shipments
@@ -122,7 +122,7 @@ export const AdminShipmentDetails = () => {
         {/* Status & Key Info Card */}
         <div className="card">
           <h2 style={{ fontSize: '1.15rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-            📊 Consignment Status
+            Consignment Status
           </h2>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>Current Status:</span>
@@ -155,7 +155,7 @@ export const AdminShipmentDetails = () => {
         {/* Route Card */}
         <div className="card">
           <h2 style={{ fontSize: '1.15rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-            🚚 Route &amp; Destination
+              Route &amp; Destination
           </h2>
           <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
             <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>SOURCE PICKUP:</span>
@@ -174,7 +174,7 @@ export const AdminShipmentDetails = () => {
         {/* Customer Info Card */}
         <div className="card">
           <h2 style={{ fontSize: '1.15rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-            👤 Customer Information
+              Customer Information
           </h2>
           {shipment.customer ? (
             <div style={{ fontSize: '0.9rem', lineHeight: '1.8' }}>
@@ -201,7 +201,7 @@ export const AdminShipmentDetails = () => {
               <div>
                 <strong>Fragile:</strong>{' '}
                 {shipment.packageEntity.fragile ? (
-                  <span className="badge badge-cancelled">⚠️ Fragile Item</span>
+                  <span className="badge badge-cancelled"> Fragile Item</span>
                 ) : (
                   <span className="badge badge-delivered">Standard Cargo</span>
                 )}
@@ -216,13 +216,13 @@ export const AdminShipmentDetails = () => {
       {/* Dispatch Controls: Assign Agent and Warehouse */}
       <div className="card" style={{ marginTop: '0.5rem' }}>
         <h2 style={{ fontSize: '1.2rem', marginBottom: '1.25rem' }}>
-          ⚙️ Dispatch &amp; Hub Assignment
+           Dispatch &amp; Hub Assignment
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {/* Assign Delivery Agent */}
           <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>🚴 Assign Delivery Agent</h3>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}> Assign Delivery Agent</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Assign an available delivery agent. Once assigned, their availability will automatically become unavailable.
             </p>
@@ -253,7 +253,7 @@ export const AdminShipmentDetails = () => {
 
           {/* Assign Warehouse */}
           <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>🏭 Assign Warehouse Hub</h3>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}> Assign Warehouse Hub</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Route this shipment through a designated sorting or storage center.
             </p>

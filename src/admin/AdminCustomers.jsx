@@ -63,7 +63,7 @@ export const AdminCustomers = () => {
           <p className="page-subtitle">View and manage registered logistics customers</p>
         </div>
         <Link to="/admin/customers/new" className="btn btn-primary">
-          ➕ Add Customer
+           Add Customer
         </Link>
       </div>
 

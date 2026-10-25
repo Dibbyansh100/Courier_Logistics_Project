@@ -77,7 +77,7 @@ export const AdminAgents = () => {
           <p className="page-subtitle">Track and configure delivery personnel &amp; courier vehicles</p>
         </div>
         <Link to="/admin/agents/new" className="btn btn-primary">
-          ➕ Add Delivery Agent
+            Add Delivery Agent
         </Link>
       </div>
 
@@ -99,7 +99,7 @@ export const AdminAgents = () => {
 
         {filteredAgents.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🚴</div>
+            <div className="empty-icon"></div>
             <p>No delivery agents found.</p>
           </div>
         ) : (
